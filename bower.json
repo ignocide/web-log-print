@@ -1,0 +1,20 @@
+{
+  "name": "web-log-print",
+  "description": "print json pretty view, prototype",
+  "main": "index.js",
+  "authors": [
+    "sungmin kim <ignocide@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/ignocide/web-log-print",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-json-tree": "^1.0.1"
+  }
+}
