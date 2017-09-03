@@ -1,24 +1,53 @@
 'use strict'
 
-const opn = require('opn')
+const http = require('http')
+const socket = require('socket.io')
+const _ = require('lodash')
 const fs = require('fs')
+const Logs = require('./lib/logs')
 
-var open = function (json) {
-  fs.readFile(__dirname + '/_template.html', 'utf-8', function (err, data) {
-    if (err) return console.error(err)
-    data = data.replace('##data##', JSON.stringify(json))
-    fs.writeFile(__dirname + '/tmp.html', data, function (err) {
-    // fs.writeFile(root.project + '.doc.html', data, function (err) {
-      if (err) return console.error(err)
-      opn(__dirname + '/tmp.html')
-    })
+const socketHandler = require('./lib/socket')
+const serverHandler = require('./lib/server')
+
+var wConsole = module.exports = function (opts) {
+  var defaultOpts = {
+    production: false,
+    port: 309,
+    host: '0.0.0.0'
+    limit: 100
+  }
+  var opts = this.opts = _.defaults(opts, defaultOpts)
+
+  this.logs = new Logs({
+    limit: opts.limit
+  })
+
+  var server = this.server = http.createServer(serverHandler)
+  var io = this.io = socket(server)
+  socketHandler(io, this.logs)
+
+  server.listen(opts.port, opts.host, function (err) {
+    console.log(server.address())
+    if (err) {
+      throw new Error('server or port already used')
+    }
   })
 }
 
-var jsonLog = function () {}
+wConsole.prototype.isServerOpen = function () {
+  if (!this.server.address()) {
+    return false
+  }
+  return true
+}
 
-var log = module.exports = function () {
-  var args = Array.prototype.slice.call(arguments)
-  args = args.length == 1 ? args[0] : args
-  open(args)
+wConsole.prototype.log = function (log) {
+  var self = this
+
+  self.logs.save(log)
+  if (!self.isServerOpen()) {
+    return false
+  }
+
+  this.io.emit('update', log)
 }

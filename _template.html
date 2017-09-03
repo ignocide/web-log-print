@@ -12,6 +12,7 @@
     <title>json logger</title>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.9/angular.min.js"></script>
     <script src="./bower_components/angular-json-tree/dist/angular-json-tree.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 
     <link rel="stylesheet" type="text/css" href="./bower_components/angular-json-tree/dist/angular-json-tree.css">
 
@@ -22,7 +23,9 @@
 
 <div class="" id="" ng-init=""  ng-controller="dataCtrl">
   <div style="padding: 50px; color: white;">
-    <json-tree object="data" start-expanded="true"></json-tree>
+    <div ng-repeat="data in datas">
+      <json-tree object="data" start-expanded="true"></json-tree>
+    </div>
   </div>
 </div>
 
@@ -32,9 +35,32 @@
 'use strict'
 var app = angular.module('jsonViewer', ['angular-json-tree'])
 
+var socket = null
+app.run(function(){
+  socket = io.connect()
+
+  socket.on('connect', function (client) {
+    console.log('connected!')
+  })
+
+  socket.on('disconnect', function (client) {
+    console.log('disconnect!')
+  })
+
+})
+
 
 app.controller('dataCtrl', function ($rootScope, $scope) {
-  $scope.data = ##data##
+  $scope.datas = []
+  socket.on('init',function(logs){
+    $scope.datas = logs
+    $scope.$apply()
+  })
+
+  socket.on('update',function(log){
+    $scope.datas.unshift(log)
+    $scope.$apply()
+  })
 })
 </script>
 </html>
