@@ -13,7 +13,7 @@ var wConsole = module.exports = function (opts) {
   var defaultOpts = {
     production: false,
     port: 309,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
     limit: 100
   }
   var opts = this.opts = _.defaults(opts, defaultOpts)
@@ -27,7 +27,6 @@ var wConsole = module.exports = function (opts) {
   socketHandler(io, this.logs)
 
   server.listen(opts.port, opts.host, function (err) {
-    console.log(server.address())
     if (err) {
       throw new Error('server or port already used')
     }
